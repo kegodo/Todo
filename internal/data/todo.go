@@ -11,7 +11,7 @@ import (
 	"todo.kegodo.net/internal/validator"
 )
 
-// todo struct supports the infromation for the todo todo
+// Todo struct supports the infromation for the todo todo
 type Todo struct {
 	ID          int64     `json:"id"`
 	CreatedAt   time.Time `json:"-"`
@@ -69,7 +69,7 @@ func (m TodoModel) Get(id int64) (*Todo, error) {
 		WHERE id = $1
 	`
 
-	//Declaring the Task varaible to hold the returned data
+	//Declaring the Todo varaible to hold the returned data
 	var todo Todo
 
 	//Creating the context
@@ -99,7 +99,7 @@ func (m TodoModel) Get(id int64) (*Todo, error) {
 	return &todo, nil
 }
 
-// Update() allows us to edit/alter a specific task
+// Update() allows us to edit/alter a specific todo task
 // Optimistic locking (version number)
 func (m TodoModel) Update(todo *Todo) error {
 	//create a query
@@ -171,10 +171,10 @@ func (m TodoModel) GetAll(title string, description string, status bool, filters
 	query := fmt.Sprintf(`
 		SELECT COUNT(*) OVER(),
 		id, created_at, title, description, status, version
-		FROM task
+		FROM todos
 		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', description) @@ plainto_tsquery('simple', $1) OR $1 = '')
-		AND (completed = FALSE OR completed = TRUE)
+		AND (status = FALSE OR status = TRUE)
 		ORDER BY %s %s, id ASC
 		LIMIT $4 OFFSET $5
 	`, filters.sortColumn(), filters.sortOrder())
