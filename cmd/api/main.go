@@ -40,10 +40,10 @@ func main() {
 	//initialize the config
 	var cfg config
 
-	// the flags that are needed to populate our config
+	// the settings that are needed to populate our config
 	cfg.port = 4000
 	cfg.env = "development"
-	cfg.db.dsn = os.Getenv("TODO_DB_DSN")
+	cfg.db.dsn = os.Getenv("TODOS_DB_DSN")
 	cfg.db.maxOpenConns = 25
 	cfg.db.maxIdleConns = 25
 	cfg.db.MaxIdleTime = "15m"
