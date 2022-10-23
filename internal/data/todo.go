@@ -21,7 +21,7 @@ type Todo struct {
 	Version     int32     `json:"version"`
 }
 
-func Validatetodo(v *validator.Validator, todo *Todo) {
+func ValidateTodo(v *validator.Validator, todo *Todo) {
 	//using check() method to check our validation checks
 	v.Check(todo.Title != "", "title", "must be provided")
 	v.Check(len(todo.Title) <= 250, "title", "must not be more than 250 bytes long")

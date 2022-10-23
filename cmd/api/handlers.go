@@ -10,7 +10,7 @@ import (
 	"todo.kegodo.net/internal/validator"
 )
 
-func (app *application) createTaskHandler(w http.ResponseWriter, r *http.Request) {
+func (app *application) createTodoHandler(w http.ResponseWriter, r *http.Request) {
 	//Our target decode destination
 	var input struct {
 		Title       string `json:"title"`
@@ -25,7 +25,7 @@ func (app *application) createTaskHandler(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	//coping the valeus from the input struct to the new task struct
+	//coping the valeus from the input struct to the new todo struct
 	todo := &data.Todo{
 		Title:       input.Title,
 		Descritpion: input.Descritpion,
@@ -36,12 +36,12 @@ func (app *application) createTaskHandler(w http.ResponseWriter, r *http.Request
 	v := validator.New()
 
 	//check the map to determine if ther were any validation errors
-	if data.Validatetodo(v, todo); !v.Valid() {
+	if data.ValidateTodo(v, todo); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	//Creating a task
+	//Creating a todo element
 	err = app.models.Todos.Insert(todo)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
@@ -51,16 +51,14 @@ func (app *application) createTaskHandler(w http.ResponseWriter, r *http.Request
 	headers := make(http.Header)
 	headers.Set("Location", fmt.Sprintf("/v1/toto/%d", todo.ID))
 
-	//Writing the JSON response with 201 - created status code with the body
-	//being the task data and the header being the headers map
 	err = app.writeJSON(w, http.StatusCreated, envelope{"todo": todo}, headers)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
 }
 
-// The showentry handler will display an individual task
-func (app *application) showTaskHandler(w http.ResponseWriter, r *http.Request) {
+// The showentry handler will display an individual todo element
+func (app *application) showTodoHandler(w http.ResponseWriter, r *http.Request) {
 	//getting the request data from param function
 	id, err := app.readIDParam(r)
 	if err != nil {
@@ -68,7 +66,7 @@ func (app *application) showTaskHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	//Fetching the specific task
+	//Fetching the specific todo element
 	todo, err := app.models.Todos.Get(id)
 
 	//Handling errors
@@ -89,10 +87,8 @@ func (app *application) showTaskHandler(w http.ResponseWriter, r *http.Request) 
 	}
 }
 
-// The updateschool handler will facilitate an update action to the task in the database
-func (app *application) updateTaskHandler(w http.ResponseWriter, r *http.Request) {
-	//This method does a partial replacement
-	//Get the id for the task that needs updating
+// Facilitates an update action to the todo element in the database
+func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request) {
 	id, err := app.readIDParam(r)
 	if err != nil {
 		app.notFoundReponse(w, r)
@@ -139,12 +135,11 @@ func (app *application) updateTaskHandler(w http.ResponseWriter, r *http.Request
 		todo.Done = *input.Done
 	}
 
-	//Performing validation on the updated task. If validation fails, then we send a 422 - unprocessable enitiy response to the client
 	//Initilize a new Validator Instance
 	v := validator.New()
 
 	//Checking the map to determin if there were any validation errors
-	if data.Validatetodo(v, todo); !v.Valid() {
+	if data.ValidateTodo(v, todo); !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
@@ -178,7 +173,6 @@ func (app *application) deleteTodoHandler(w http.ResponseWriter, r *http.Request
 
 	err = app.models.Todos.Delete(id)
 
-	//handling errors
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
@@ -196,7 +190,7 @@ func (app *application) deleteTodoHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
-// The listtask handler allows the client to see a listing of a schools based on a set of criteria
+// The listTodo handler allows the client to see a listing of a schools based on a set of criteria
 func (app *application) listTododHandler(w http.ResponseWriter, r *http.Request) {
 	//creating an input struct to hold our query parameters
 	var input struct {
@@ -229,7 +223,7 @@ func (app *application) listTododHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	//Geting a listing of all tasks
+	//Geting a listing of all todo elements
 	todos, metadata, err := app.models.Todos.GetAll(input.Title, input.Description, input.Done, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
