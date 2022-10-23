@@ -10,6 +10,7 @@ import (
 	"os"
 	"time"
 
+	_ "github.com/lib/pq"
 	"todo.kegodo.net/internal/data"
 )
 

@@ -1,5 +1,6 @@
 // File: todo/cmd/api/helpers.go
 package main
+
 import (
 	"encoding/json"
 	"errors"
@@ -10,8 +11,8 @@ import (
 	"strconv"
 	"strings"
 
-	"todo.kegodo.net/internal/validator"
 	"github.com/julienschmidt/httprouter"
+	"todo.kegodo.net/internal/validator"
 )
 
 // Define a new type named envelope
@@ -143,4 +144,22 @@ func (app *application) readInt(qs url.Values, key string, defaultValue int, v *
 		return defaultValue
 	}
 	return intValue
+}
+
+// The readbool() methods converst a string value from the query to a bool value
+// if the value cannot be converted to an interger then a validation error is added to the validaiton errors map
+func (app *application) readBool(qs url.Values, key string, defaultValue bool, v *validator.Validator) bool {
+	//getting the value
+	value := qs.Get(key)
+	if value == "" {
+		return defaultValue
+	}
+
+	//Performing the conversion to an boolean
+	boolValue, err := strconv.ParseBool(value)
+	if err != nil {
+		v.AddError(key, "must be a boolean value")
+		return defaultValue
+	}
+	return boolValue
 }

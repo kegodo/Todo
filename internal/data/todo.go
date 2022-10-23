@@ -17,7 +17,7 @@ type Todo struct {
 	CreatedAt   time.Time `json:"-"`
 	Title       string    `json:"title"`
 	Descritpion string    `json:"description"`
-	Done        bool      `json:"status`
+	Done        bool      `json:"done"`
 	Version     int32     `json:"version"`
 }
 
