@@ -13,19 +13,22 @@ import (
 	"module todo.kegodo.net/internal/data"
 )
 
-// configuration struct to hold configuration settings
+// configuration settings
 type config struct {
-	port int      //port on which the databased will open on
-	env  string   //which environment we are working in (for this quiz it'll be development)
-	db   struct { //database limiters and dependencies
-		dsn          string //connection to databases
-		maxOpenConns int    //limit of open connections
-		maxIdleConns int    //limit of idle connections
-		MaxIdleTime  string //limit on idle time
+	port int      
+	env  string   
+	db   struct { // development, staging, production, etc.
+		dsn          string 
+		maxOpenConns int    
+		maxIdleConns int    
+		MaxIdleTime  string 
 	}
 }
 
-// application struct is made to facilitate dependency injection
+// The application version number
+const version = "1.0.0"
+
+// Dependency Injections
 type application struct {
 	config config
 	logger *log.Logger
@@ -34,10 +37,10 @@ type application struct {
 
 // main
 func main() {
-	//initializing where the configurations are gonna be stored
+	//initialize the config
 	var cfg config
 
-	//hardcoding cofigurations since they are required for the quiz
+	// the flags that are needed to populate our config
 	cfg.port = 4000
 	cfg.env = "development"
 	cfg.db.dsn = os.Getenv("TODO_DB_DSN")
