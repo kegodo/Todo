@@ -10,18 +10,18 @@ import (
 	"os"
 	"time"
 
-	"module todo.kegodo.net/internal/data"
+	"todo.kegodo.net/internal/data"
 )
 
 // configuration settings
 type config struct {
-	port int      
-	env  string   
+	port int
+	env  string
 	db   struct { // development, staging, production, etc.
-		dsn          string 
-		maxOpenConns int    
-		maxIdleConns int    
-		MaxIdleTime  string 
+		dsn          string
+		maxOpenConns int
+		maxIdleConns int
+		MaxIdleTime  string
 	}
 }
 
