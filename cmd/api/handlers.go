@@ -15,7 +15,7 @@ func (app *application) createTodoHandler(w http.ResponseWriter, r *http.Request
 	var input struct {
 		Title       string `json:"title"`
 		Description string `json:"description"`
-		Done        string `json:"status"`
+		Done        string `json:"done"`
 	}
 
 	//Initialize a new json.Decoder instance
@@ -51,7 +51,7 @@ func (app *application) createTodoHandler(w http.ResponseWriter, r *http.Request
 	headers := make(http.Header)
 	headers.Set("Location", fmt.Sprintf("/v1/toto/%d", todo.ID))
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"todo": todo}, headers)
+	err = app.writeJSON(w, http.StatusCreated, envelope{"title": todo}, headers)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -81,7 +81,7 @@ func (app *application) showTodoHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	//Writing the data from the returned get()
-	err = app.writeJSON(w, http.StatusOK, envelope{"todo": todo}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"title": todo}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -114,7 +114,7 @@ func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request
 	var input struct {
 		Title       *string `json:"title"`
 		Description *string `json:"description"`
-		Done        *string `json:"status"`
+		Done        *string `json:"done"`
 	}
 
 	//Initilizing a new json.Decoder instance
@@ -209,7 +209,7 @@ func (app *application) listTododHandler(w http.ResponseWriter, r *http.Request)
 	//Using the helper method to extract the values
 	input.Title = app.readString(qs, "title", "")
 	input.Description = app.readString(qs, "decription", "")
-	input.Description = app.readString(qs, "status", "")
+	input.Done = app.readString(qs, "done", "")
 
 	//Get the page information
 	input.Filters.Page = app.readInt(qs, "page", 1, v)
@@ -217,7 +217,7 @@ func (app *application) listTododHandler(w http.ResponseWriter, r *http.Request)
 	//Get the sort information
 	input.Filters.Sort = app.readString(qs, "sort", "id")
 	// Specific the allowed sort values
-	input.Filters.SortList = []string{"id", "title", "description", "status", "-id", "-title", "-description", "-status"}
+	input.Filters.SortList = []string{"id", "title", "description", "done", "-id", "-title", "-description", "-done"}
 
 	//checking for validation errors
 	if data.ValidateFilter(v, input.Filters); !v.Valid() {

@@ -26,11 +26,8 @@ func ValidateTodo(v *validator.Validator, todo *Todo) {
 	v.Check(todo.Title != "", "title", "must be provided")
 	v.Check(len(todo.Title) <= 250, "title", "must not be more than 250 bytes long")
 
-	v.Check(todo.Description != "", "description", "must be provided")
 	v.Check(len(todo.Description) <= 250, "description", "must no be more than 250 bytes long")
 
-	v.Check(todo.Done != "", "done", "must be provided")
-	v.Check(len(todo.Done) <= 250, "done", "must no be more than 250 bytes long")
 }
 
 type TodoModel struct {
@@ -109,7 +106,7 @@ func (m TodoModel) Update(todo *Todo) error {
 		SET title = $1, description = $2, done = $3, version = version + 1
 		WHERE id = $4
 		AND version = $5
-		RETURNING version
+		RETURNING id
 	`
 	args := []interface{}{
 		todo.Title,
@@ -125,16 +122,7 @@ func (m TodoModel) Update(todo *Todo) error {
 	defer cancel()
 
 	//Check for edit conflicts
-	err := m.DB.QueryRowContext(ctx, query, args...).Scan(&todo.Version)
-	if err != nil {
-		switch {
-		case errors.Is(err, sql.ErrNoRows):
-			return ErrEditConflict
-		default:
-			return err
-		}
-	}
-	return nil
+	return m.DB.QueryRowContext(ctx, query, args...).Scan(&todo.Version)
 
 }
 
@@ -182,8 +170,9 @@ func (m TodoModel) GetAll(title string, description string, filters Filters) ([]
 		FROM todos
 		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', description) @@ plainto_tsquery('simple', $2) OR $2 = '')
+		AND to_tsvector('simple', done) @@ plainto_tsquery('simple', $3) OR $3 = '')
 		ORDER BY %s %s, id ASC
-		LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortOrder())
+		LIMIT $4 OFFSET $5`, filters.sortColumn(), filters.sortOrder())
 
 	//creating the 3 second time out context
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
