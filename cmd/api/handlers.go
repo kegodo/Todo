@@ -226,14 +226,14 @@ func (app *application) listTododHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	//Geting a listing of all todo elements
-	todos, metadata, err := app.models.Todos.GetAll(input.Title, input.Description, input.Filters)
+	tasks, metadata, err := app.models.Todos.GetAll(input.Title, input.Description, input.Done, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
 	}
 
 	//sending JSON response
-	err = app.writeJSON(w, http.StatusOK, envelope{"todos": todos, "metadata": metadata}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"todos": tasks, "metadata": metadata}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return

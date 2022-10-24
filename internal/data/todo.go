@@ -37,8 +37,8 @@ type TodoModel struct {
 // Insert() allows us to create a new todo
 func (m TodoModel) Insert(todo *Todo) error {
 	query := `
-		INSERT INTO todos (title, description)
-		VALUES ($1, $2)
+		INSERT INTO todos (title, description, done)
+		VALUES ($1, $2, $3)
 		RETURNING id, createdat, version
 	`
 
@@ -162,7 +162,7 @@ func (m TodoModel) Delete(id int64) error {
 	return nil
 }
 
-func (m TodoModel) GetAll(title string, description string, filters Filters) ([]*Todo, Metadata, error) {
+func (m TodoModel) GetAll(title string, description string, done string, filters Filters) ([]*Todo, Metadata, error) {
 	//constructing the query
 	query := fmt.Sprintf(`
 		SELECT COUNT(*) OVER(),
