@@ -15,6 +15,7 @@ func (app *application) routes() *httprouter.Router {
 	router.MethodNotAllowed = http.HandlerFunc(app.methodNotAllowedResponse)
 
 	router.HandlerFunc(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler)
+	router.HandlerFunc(http.MethodGet, "/v1/todo", app.listTododHandler)
 	router.HandlerFunc(http.MethodPost, "/v1/todo", app.createTodoHandler)
 	router.HandlerFunc(http.MethodGet, "/v1/todo/:id", app.showTodoHandler)
 	router.HandlerFunc(http.MethodPatch, "/v1/todo/:id", app.updateTodoHandler)

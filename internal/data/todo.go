@@ -16,7 +16,7 @@ type Todo struct {
 	ID          int64     `json:"id"`
 	CreatedAt   time.Time `json:"-"`
 	Title       string    `json:"title"`
-	Descritpion string    `json:"description"`
+	Description string    `json:"description"`
 	Done        bool      `json:"done"`
 	Version     int32     `json:"version"`
 }
@@ -26,8 +26,8 @@ func ValidateTodo(v *validator.Validator, todo *Todo) {
 	v.Check(todo.Title != "", "title", "must be provided")
 	v.Check(len(todo.Title) <= 250, "title", "must not be more than 250 bytes long")
 
-	v.Check(todo.Descritpion != "", "description", "must be provided")
-	v.Check(len(todo.Descritpion) <= 250, "description", "must no be more than 250 bytes long")
+	v.Check(todo.Description != "", "description", "must be provided")
+	v.Check(len(todo.Description) <= 250, "description", "must no be more than 250 bytes long")
 
 	v.Check(todo.Done != false, "Done", "default task as false")
 }
@@ -41,7 +41,7 @@ func (m TodoModel) Insert(todo *Todo) error {
 	query := `
 		INSERT INTO todos (title, description)
 		VALUES ($1, $2)
-		RETURNING id, created_at, version
+		RETURNING id, createdat, version
 	`
 
 	//creating the context
@@ -50,7 +50,7 @@ func (m TodoModel) Insert(todo *Todo) error {
 	defer cancel()
 
 	//collect the date field into a slice
-	args := []interface{}{todo.Title, todo.Descritpion}
+	args := []interface{}{todo.Title, todo.Description}
 
 	return m.DB.QueryRowContext(ctx, query, args...).Scan(&todo.ID, &todo.CreatedAt, &todo.Version)
 }
@@ -64,7 +64,7 @@ func (m TodoModel) Get(id int64) (*Todo, error) {
 
 	//Construct our query with the given id
 	query := `
-		SELECT id, create_at, title, description, status, version
+		SELECT id, createdat, title, description, done, version
 		FROM todos
 		WHERE id = $1
 	`
@@ -81,7 +81,7 @@ func (m TodoModel) Get(id int64) (*Todo, error) {
 		&todo.ID,
 		&todo.CreatedAt,
 		&todo.Title,
-		&todo.Descritpion,
+		&todo.Description,
 		&todo.Done,
 		&todo.Version,
 	)
@@ -105,12 +105,12 @@ func (m TodoModel) Update(todo *Todo) error {
 	//create a query
 	query := `
 		UPDATE todos
-		SET title = $1, description = $2, status = $3, version = version + 1
+		SET title = $1, description = $2, done = $3, version = version + 1
 		WHERE id = $4
 		AND version = $5
 		RETURNING version
 	`
-	args := []interface{}{todo.Title, todo.Descritpion, todo.Done, todo.ID, todo.Version}
+	args := []interface{}{todo.Title, todo.Description, todo.Done, todo.ID, todo.Version}
 
 	//Creating the context
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -170,11 +170,11 @@ func (m TodoModel) GetAll(title string, description string, status bool, filters
 	//constructing the query
 	query := fmt.Sprintf(`
 		SELECT COUNT(*) OVER(),
-		id, created_at, title, description, status, version
+		id, createdat, title, description, done, version
 		FROM todos
 		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
 		AND (to_tsvector('simple', description) @@ plainto_tsquery('simple', $1) OR $1 = '')
-		AND (status = FALSE OR status = TRUE)
+		AND (done = FALSE OR done = TRUE)
 		ORDER BY %s %s, id ASC
 		LIMIT $4 OFFSET $5
 	`, filters.sortColumn(), filters.sortOrder())
@@ -206,7 +206,7 @@ func (m TodoModel) GetAll(title string, description string, status bool, filters
 			&totalRecords,
 			&todo.ID,
 			&todo.CreatedAt,
-			&todo.Descritpion,
+			&todo.Description,
 			&todo.Done,
 			&todo.Version,
 		)

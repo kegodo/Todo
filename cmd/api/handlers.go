@@ -14,7 +14,7 @@ func (app *application) createTodoHandler(w http.ResponseWriter, r *http.Request
 	//Our target decode destination
 	var input struct {
 		Title       string `json:"title"`
-		Descritpion string `json:"description"`
+		Description string `json:"description"`
 		Done        bool   `json:"status"`
 	}
 
@@ -28,7 +28,7 @@ func (app *application) createTodoHandler(w http.ResponseWriter, r *http.Request
 	//coping the valeus from the input struct to the new todo struct
 	todo := &data.Todo{
 		Title:       input.Title,
-		Descritpion: input.Descritpion,
+		Description: input.Description,
 		Done:        input.Done,
 	}
 
@@ -129,7 +129,7 @@ func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request
 		todo.Title = *input.Title
 	}
 	if input.Description != nil {
-		todo.Descritpion = *input.Description
+		todo.Description = *input.Description
 	}
 	if input.Done != nil {
 		todo.Done = *input.Done
@@ -211,11 +211,13 @@ func (app *application) listTododHandler(w http.ResponseWriter, r *http.Request)
 	input.Description = app.readString(qs, "decription", "")
 	input.Done = app.readBool(qs, "status", false, v)
 
-	//filering now
+	//Get the page information
 	input.Filters.Page = app.readInt(qs, "page", 1, v)
 	input.Filters.PageSize = app.readInt(qs, "page_size", 20, v)
+	//Get the sort information
 	input.Filters.Sort = app.readString(qs, "sort", "id")
-	input.Filters.SortList = []string{"id", "title", "status", "-id", "-description", "-status"}
+	// Specific the allowed sort values
+	input.Filters.SortList = []string{"id", "title", "description", "status", "-id", "-title", "-description", "-status"}
 
 	//checking for validation errors
 	if data.ValidateFilter(v, input.Filters); !v.Valid() {
