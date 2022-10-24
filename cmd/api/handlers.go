@@ -47,11 +47,11 @@ func (app *application) createTodoHandler(w http.ResponseWriter, r *http.Request
 		app.serverErrorResponse(w, r, err)
 	}
 
-	//Create a location header for the newly created resource/School
+	//Create a location header for the newly created resource
 	headers := make(http.Header)
 	headers.Set("Location", fmt.Sprintf("/v1/toto/%d", todo.ID))
 
-	err = app.writeJSON(w, http.StatusCreated, envelope{"title": todo}, headers)
+	err = app.writeJSON(w, http.StatusCreated, envelope{"todo": todo}, headers)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -81,7 +81,7 @@ func (app *application) showTodoHandler(w http.ResponseWriter, r *http.Request) 
 	}
 
 	//Writing the data from the returned get()
-	err = app.writeJSON(w, http.StatusOK, envelope{"title": todo}, nil)
+	err = app.writeJSON(w, http.StatusOK, envelope{"todo": todo}, nil)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 	}
@@ -190,7 +190,7 @@ func (app *application) deleteTodoHandler(w http.ResponseWriter, r *http.Request
 	}
 }
 
-// The listTodo handler allows the client to see a listing of a schools based on a set of criteria
+// The listTodo handler allows the client to see a listing of todo elements based on a set of criteria
 func (app *application) listTododHandler(w http.ResponseWriter, r *http.Request) {
 	//creating an input struct to hold our query parameters
 	var input struct {

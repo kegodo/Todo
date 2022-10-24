@@ -48,7 +48,7 @@ func (m TodoModel) Insert(todo *Todo) error {
 	defer cancel()
 
 	//collect the date field into a slice
-	args := []interface{}{todo.Title, todo.Description}
+	args := []interface{}{todo.Title, todo.Description, todo.Done}
 
 	return m.DB.QueryRowContext(ctx, query, args...).Scan(&todo.ID, &todo.CreatedAt, &todo.Version)
 }
@@ -105,15 +105,13 @@ func (m TodoModel) Update(todo *Todo) error {
 		UPDATE todos
 		SET title = $1, description = $2, done = $3, version = version + 1
 		WHERE id = $4
-		AND version = $5
-		RETURNING id
+		RETURNING version
 	`
 	args := []interface{}{
 		todo.Title,
 		todo.Description,
 		todo.Done,
 		todo.ID,
-		todo.Version,
 	}
 
 	//Creating the context
