@@ -17,7 +17,7 @@ type Todo struct {
 	CreatedAt   time.Time `json:"-"`
 	Title       string    `json:"title"`
 	Description string    `json:"description"`
-	Done        bool      `json:"done"`
+	Done        string    `json:"done"`
 	Version     int32     `json:"version"`
 }
 
@@ -29,7 +29,8 @@ func ValidateTodo(v *validator.Validator, todo *Todo) {
 	v.Check(todo.Description != "", "description", "must be provided")
 	v.Check(len(todo.Description) <= 250, "description", "must no be more than 250 bytes long")
 
-	v.Check(todo.Done != false, "Done", "default task as false")
+	v.Check(todo.Done != "", "done", "must be provided")
+	v.Check(len(todo.Done) <= 250, "done", "must no be more than 250 bytes long")
 }
 
 type TodoModel struct {
@@ -46,7 +47,7 @@ func (m TodoModel) Insert(todo *Todo) error {
 
 	//creating the context
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
-	//Cleaning up to prevent memory leaks
+	//Clean up to prevent memory leaks
 	defer cancel()
 
 	//collect the date field into a slice
@@ -110,7 +111,13 @@ func (m TodoModel) Update(todo *Todo) error {
 		AND version = $5
 		RETURNING version
 	`
-	args := []interface{}{todo.Title, todo.Description, todo.Done, todo.ID, todo.Version}
+	args := []interface{}{
+		todo.Title,
+		todo.Description,
+		todo.Done,
+		todo.ID,
+		todo.Version,
+	}
 
 	//Creating the context
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
@@ -136,7 +143,7 @@ func (m TodoModel) Delete(id int64) error {
 	if id < 1 {
 		return ErrRecordNotFound
 	}
-	//creating the delete query
+	//Create the delete query
 	query := `
 		DELETE FROM todos
 		WHERE id = $1
@@ -147,13 +154,14 @@ func (m TodoModel) Delete(id int64) error {
 	//clearing up to prevent memory leaks
 	defer cancel()
 
-	//Executing the query
+	//Execute the query
 	result, err := m.DB.ExecContext(ctx, query, id)
 	if err != nil {
 		return err
 	}
 
-	//checking how many rows were affected by the delete operation. we call the RowsAffected() method on the result variable
+	//Check how many rows were affected by the delete operation.
+	//We call the RowsAffected() method on the result variable
 	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return err
@@ -166,25 +174,23 @@ func (m TodoModel) Delete(id int64) error {
 	return nil
 }
 
-func (m TodoModel) GetAll(title string, description string, status bool, filters Filters) ([]*Todo, Metadata, error) {
+func (m TodoModel) GetAll(title string, description string, filters Filters) ([]*Todo, Metadata, error) {
 	//constructing the query
 	query := fmt.Sprintf(`
 		SELECT COUNT(*) OVER(),
-		id, createdat, title, description, done, version
+	    id, createdat, title, description, done, version
 		FROM todos
 		WHERE (to_tsvector('simple', title) @@ plainto_tsquery('simple', $1) OR $1 = '')
-		AND (to_tsvector('simple', description) @@ plainto_tsquery('simple', $1) OR $1 = '')
-		AND (done = FALSE OR done = TRUE)
+		AND (to_tsvector('simple', description) @@ plainto_tsquery('simple', $2) OR $2 = '')
 		ORDER BY %s %s, id ASC
-		LIMIT $4 OFFSET $5
-	`, filters.sortColumn(), filters.sortOrder())
+		LIMIT $3 OFFSET $4`, filters.sortColumn(), filters.sortOrder())
 
 	//creating the 3 second time out context
 	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
 	defer cancel()
 
 	//Execute the query
-	args := []interface{}{title, description, status, filters.limit(), filters.offSet()}
+	args := []interface{}{title, description, filters.limit(), filters.offSet()}
 	rows, err := m.DB.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, Metadata{}, err

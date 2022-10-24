@@ -1,0 +1,77 @@
+* {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+    font-family: 'Helvetica';
+    font-size: 20px;
+  }
+  
+  body {
+    background-color: #16161685;
+  }
+  
+  .container {
+    width: 70%;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+  
+  .container .hero {
+    font-size: 1.6em;
+    text-align: center;
+    padding: 3rem 0rem;
+  }
+  
+  .container ul li {
+    list-style: none;
+  }
+  
+  .container .item-group {
+    padding: 1rem;
+  }
+  
+  .item-group .item-input {
+    border: 2px solid #dfd7d0;
+    border-radius: 3px;
+    padding: 7px 3px;
+    margin-right: 10px;
+    width: 80%;
+  }
+  
+  .item-group .item-button {
+    border-radius: 3px;
+    padding: 5px 10px;
+  }
+  
+  .item-group .item-title {
+    margin-bottom: 15px;
+    font-size: 1.1em;
+  }
+  
+  button {
+    background-color: #e9e7e7;
+    border: 1px solid #888787;
+  }
+  
+  button:hover {
+    cursor: pointer;
+    transition: ease 0.3s;
+    background-color: #bebcbc;
+  }
+  
+  .todo-item-group .todo-item {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 3px solid #858276;
+    border-radius: 5px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #FFF;
+  }
+  
+  
+  .todo-item .todo-item-title {
+    font-size: 0.9em;
+  }
+  

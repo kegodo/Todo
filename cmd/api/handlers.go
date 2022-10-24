@@ -15,7 +15,7 @@ func (app *application) createTodoHandler(w http.ResponseWriter, r *http.Request
 	var input struct {
 		Title       string `json:"title"`
 		Description string `json:"description"`
-		Done        bool   `json:"status"`
+		Done        string `json:"status"`
 	}
 
 	//Initialize a new json.Decoder instance
@@ -114,7 +114,7 @@ func (app *application) updateTodoHandler(w http.ResponseWriter, r *http.Request
 	var input struct {
 		Title       *string `json:"title"`
 		Description *string `json:"description"`
-		Done        *bool   `json:"status"`
+		Done        *string `json:"status"`
 	}
 
 	//Initilizing a new json.Decoder instance
@@ -196,7 +196,7 @@ func (app *application) listTododHandler(w http.ResponseWriter, r *http.Request)
 	var input struct {
 		Title       string
 		Description string
-		Done        bool
+		Done        string
 		data.Filters
 	}
 
@@ -209,7 +209,7 @@ func (app *application) listTododHandler(w http.ResponseWriter, r *http.Request)
 	//Using the helper method to extract the values
 	input.Title = app.readString(qs, "title", "")
 	input.Description = app.readString(qs, "decription", "")
-	input.Done = app.readBool(qs, "status", false, v)
+	input.Description = app.readString(qs, "status", "")
 
 	//Get the page information
 	input.Filters.Page = app.readInt(qs, "page", 1, v)
@@ -226,7 +226,7 @@ func (app *application) listTododHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	//Geting a listing of all todo elements
-	todos, metadata, err := app.models.Todos.GetAll(input.Title, input.Description, input.Done, input.Filters)
+	todos, metadata, err := app.models.Todos.GetAll(input.Title, input.Description, input.Filters)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
